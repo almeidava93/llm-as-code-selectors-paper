@@ -1,6 +1,6 @@
 # Large Language Models as Medical Codes Selectors: a benchmark using the International Classification of Primary Care
 
-![](plots\price_per_response_vs_f1.png)
+![](plots/price_per_response_vs_f1.png)
 
 This repository contains the data and code for the study "Large Language Models as Medical Codes Selectors: a benchmark using the International Classification of Primary Care" published as preprint at arXiv and currently under peer review. The full article is available here.
 
