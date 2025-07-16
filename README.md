@@ -37,11 +37,21 @@ Run the following to perform inference with all the selected LLMs. The results o
     ```
 
 - **Evaluation**:
-Run the following to compute the evaluation metrics, graphs and LaTeX tables. All files will be stored in the `results` folder.
+Run the following to compute the evaluation metrics and create the LaTeX tables. All files will be stored in the `results` folder.
     ```
     python eval.py
     ```
     or simply use `uv run`:
     ```
     uv run eval.py
+    ```
+
+- **Plots**:
+Run the following to plot the graphs. 
+    ```
+    python plot.py
+    ```
+    or simply use `uv run`:
+    ```
+    uv run plot.py
     ```
