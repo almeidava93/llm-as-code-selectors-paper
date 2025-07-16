@@ -1,0 +1,75 @@
+# This CITATION.cff file was generated with cffinit.
+# Visit https://bit.ly/cffinit to generate yours today!
+
+cff-version: 1.2.0
+title: >-
+  Source code for the paper: "Large Language Models as
+  Medical Codes Selectors: a benchmark using the
+  International Classification of Primary Care"
+message: >-
+  If you use this software, please cite it using the
+  metadata from this file.
+type: software
+authors:
+  - given-names: Vinicius
+    family-names: Anjos de Almeida
+    email: vinicius.almeida@alumni.usp.br
+    affiliation: University of São Paulo
+    orcid: 'https://orcid.org/0009-0001-1273-586X'
+identifiers:
+  - type: doi
+    value: 10.5281/zenodo.15998992
+repository-code: 'https://github.com/almeidava93/llm-as-code-selectors-paper'
+abstract: >-
+  Background: Medical coding is critical for structuring
+  healthcare data. It can lead to a better understanding of
+  population health, guide quality improvement
+  interventions, and policy making. This study investigates
+  the ability of large language models (LLMs) to select
+  appropriate codes from the International Classification of
+  Primary Care, 2nd edition (ICPC-2), based on the results
+  of a specialized search engine.
+
+
+  Methods: A dataset of 437 clinical expressions in
+  Brazilian Portuguese was used, each annotated with
+  relevant ICPC-2 codes. A semantic search engine based on
+  OpenAI’s text-embedding-3-large model retrieved candidate
+  expressions from a corpus of 73,563 ICPC-2-labeled
+  concepts. Thirty-three LLMs (both open-source and private)
+  were prompted with each query and a ranked list of
+  retrieved results, and asked to return the best-matching
+  ICPC-2 code. Performance was evaluated using F1-score,
+  with additional analysis of token usage, cost, response
+  time, and formatting adherence.
+
+
+  Results: Of the 33 models evaluated, 28 achieved a maximum
+  F1-score above 0.8, and 10 exceeded 0.85. The
+  top-performing models were gpt-4.5-preview, o3, and
+  gemini-2.5-pro. By optimizing the retriever, performance
+  can improve by up to 4 percentage points. Most models were
+  able to return valid codes in the expected format and
+  restrict outputs to retrieved results, reducing
+  hallucination risk. Notably, smaller models (<3B
+  parameters) underperformed due to format inconsistencies
+  and sensitivity to input length.
+
+
+  Conclusions: LLMs show strong potential for automating
+  ICPC-2 code selection, with many models achieving high
+  performance even without task-specific fine-tuning. This
+  work establishes a benchmark for future studies and
+  describes some of the challenges for achieving better
+  results.
+keywords:
+  - International Classification of Primary Care
+  - Medical coding
+  - Medical coding automation
+  - Large language models
+  - Artificial intelligence
+  - Benchmark
+  - Extreme multiclass classification
+license: MIT
+version: 1.0.0
+date-released: '2025-07-16'
