@@ -1,0 +1,327 @@
+# Input/Output/Cached input price: US dollars per 1M tokens
+# Parameters: in Billions of parameters
+# BRL to USD conversion rate: 1USD = 5.8BRL
+
+# Template:
+# input_price = 
+# cached_input_price = 
+# output_price = 
+# num_params = false
+# hosting_platform = ''
+# opensource = false
+# preview = false
+
+[models.openai]
+provider_name = 'OpenAI'
+
+[models.openai.gpt-4o]
+input_price = 2.5
+cached_input_price = 1.25
+output_price = 10.0
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
+[models.openai.gpt-4o-mini]
+input_price = 0.15
+cached_input_price = 0.075
+output_price = 0.6
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
+[models.openai."gpt-4.5-preview"]
+input_price = 75.0
+cached_input_price = 37.5
+output_price = 150.0
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = true
+
+[models.openai.o1]
+input_price = 15.0
+cached_input_price = 7.5
+output_price = 60.0
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
+[models.openai.o1-mini]
+input_price = 1.1
+cached_input_price = 0.55
+output_price = 4.4
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
+[models.openai.o3-mini]
+input_price = 1.1
+cached_input_price = 0.55
+output_price = 4.4
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
+[models.openai.o3]
+input_price = 10.0
+cached_input_price = 2.50
+output_price = 40.00
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
+[models.openai."gpt-4.1"]
+input_price = 2.00
+cached_input_price = 0.50
+output_price = 8.00
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
+[models.openai."gpt-4.1-mini"]
+input_price = 0.40
+cached_input_price = 0.10
+output_price = 1.60
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
+[models.openai."gpt-4.1-nano"]
+input_price = 0.10
+cached_input_price = 0.025
+output_price = 0.40
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
+[models.openai.o4-mini]
+input_price = 1.10
+cached_input_price = 0.275
+output_price = 4.40
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
+[models.deepseek]
+provider_name = 'DeepSeek'
+
+[models.deepseek.DeepSeek-V3]
+input_price = 0.9
+cached_input_price = false
+output_price = 0.9
+num_params = 685.0
+hosting_platform = 'fireworks.ai'
+opensource = true
+preview = false
+
+[models.deepseek.DeepSeek-R1]
+input_price = 0.55
+cached_input_price = false
+output_price = 2.19
+num_params = 685.0
+hosting_platform = 'fireworks.ai'
+opensource = true
+preview = false
+
+[models.deepseek."DeepSeek-R1-Distill-Qwen-1.5B"]
+input_price = false
+cached_input_price = false
+output_price = false
+num_params = 1.5
+hosting_platform = 'local'
+opensource = true
+preview = false
+
+[models.deepseek."DeepSeek-R1-Distill-Qwen-7B"]
+input_price = 0.2
+cached_input_price = false
+output_price = 0.2
+num_params = 7.0
+hosting_platform = 'fireworks.ai'
+opensource = true
+preview = false
+
+[models.google]
+provider_name = 'Google'
+
+[models.google."gemini-2.0-flash"]
+input_price = 0.1
+cached_input_price = 0.025
+output_price = 0.4
+num_params = false
+hosting_platform = 'google'
+opensource = false
+preview = false
+
+[models.google."gemini-2.0-flash-lite"]
+input_price = 0.075
+cached_input_price = false
+output_price = 0.3
+num_params = false
+hosting_platform = 'google'
+opensource = false
+preview = false
+
+[models.google."gemini-2.0-pro-exp-02-05"]
+input_price = false
+cached_input_price = false
+output_price = false
+num_params = false
+hosting_platform = 'google'
+opensource = false
+preview = false
+
+[models.google."gemini-2.5-pro-exp-03-25"]
+input_price = false
+cached_input_price = false
+output_price = false
+num_params = false
+hosting_platform = 'google'
+opensource = false
+preview = false
+
+[models.google.gemma-3-27b-it]
+input_price = false
+cached_input_price = false
+output_price = false
+num_params = 27.0
+hosting_platform = 'huggingface'
+opensource = true
+preview = false
+
+[models.google.gemma-2-27b-it]
+input_price = false
+cached_input_price = false
+output_price = false
+num_params = 27.0
+hosting_platform = 'huggingface'
+opensource = true
+preview = false
+
+[models.google.gemma-3-4b-it]
+input_price = false
+cached_input_price = false
+output_price = false
+num_params = 4.0
+hosting_platform = 'local'
+opensource = true
+preview = false
+
+[models.meta]
+provider_name = 'Meta'
+
+[models.meta."Llama-3.3-70B-Instruct"]
+input_price = false
+cached_input_price = false
+output_price = false
+num_params = 70.0
+hosting_platform = 'huggingface'
+opensource = true
+preview = false
+
+[models.meta."Llama-3.2-3B-Instruct"]
+input_price = false
+cached_input_price = false
+output_price = false
+num_params = 3.0
+hosting_platform = 'huggingface'
+opensource = true
+preview = false
+
+[models.meta."Llama-3.1-405B-Instruct"]
+input_price = 3.0
+cached_input_price = false
+output_price = 3.0
+num_params = 405.0
+hosting_platform = 'fireworks.ai'
+opensource = true
+preview = false
+
+[models.meta."Llama-3.1-70B-Instruct"]
+input_price = 0.9
+cached_input_price = false
+output_price = 0.9
+num_params = 70.0
+hosting_platform = 'fireworks.ai'
+opensource = true
+preview = false
+
+[models.meta."Llama-3-70B-Instruct"]
+input_price = 0.9
+cached_input_price = false
+output_price = 0.9
+num_params = 70.0
+hosting_platform = 'fireworks.ai'
+opensource = true
+preview = false
+
+[models.meta."Llama-4-Maverick-Instruct-Basic"]
+input_price = 0.22
+cached_input_price = false
+output_price = 0.88
+num_params = 400.0
+hosting_platform = 'fireworks.ai'
+opensource = true
+preview = false
+
+[models.meta."Llama-4-Scout-Instruct-Basic"]
+input_price = 0.15
+cached_input_price = false
+output_price = 0.60
+num_params = 109.0
+hosting_platform = 'fireworks.ai'
+opensource = true
+preview = false
+
+[models.meta."Llama-3.2-1B-Instruct"]
+input_price = false
+cached_input_price = false
+output_price = false
+num_params = 1.0
+hosting_platform = 'local'
+opensource = true
+preview = false
+
+[models.maritaca]
+provider_name = 'Maritaca AI'
+
+[models.maritaca.sabia-3]
+input_price = 0.86
+cached_input_price = false
+output_price = 1.72
+num_params = false
+hosting_platform = 'maritaca.ai'
+opensource = false
+preview = false
+
+[models.maritaca.sabiazinho-3]
+input_price = 0.17
+cached_input_price = false
+output_price = 0.52
+num_params = false
+hosting_platform = 'maritaca.ai'
+opensource = false
+preview = false
+
+[models.qwen]
+provider_name = 'Qwen'
+
+[models.qwen.QwQ-32B]
+input_price = 0.9
+cached_input_price = false
+output_price = 0.9
+num_params = 32.0
+hosting_platform = 'fireworks.ai'
+opensource = true
+preview = false
