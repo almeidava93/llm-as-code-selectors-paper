@@ -59,3 +59,25 @@ Run the following to plot the graphs.
     ```
     uv run plot.py
     ```
+
+## Reproducing the study results
+
+If you find this repository useful, please consider citing it.
+
+APA-style citation:
+```
+Anjos de Almeida, V. (2025). Source code for the paper: "Large Language Models as Medical Codes Selectors: a benchmark using the International Classification of Primary Care" (Version 1.0.0) [Computer software]. https://github.com/almeidava93/llm-as-code-selectors-paper
+```
+
+BibTeX entry:
+```
+@software{Anjos_de_Almeida_Source_code_for_2025,
+    author = {Anjos de Almeida, Vinicius},
+    license = {MIT},
+    month = jul,
+    title = {{Source code for the paper: "Large Language Models as Medical Codes Selectors: a benchmark using the International Classification of Primary Care"}},
+    url = {https://github.com/almeidava93/llm-as-code-selectors-paper},
+    version = {1.0.0},
+    year = {2025}
+}
+```
