@@ -60,7 +60,7 @@ Run the following to plot the graphs.
     uv run plot.py
     ```
 
-## Reproducing the study results
+## Citation
 
 If you find this repository useful, please consider citing it.
 
