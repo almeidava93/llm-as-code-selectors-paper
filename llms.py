@@ -29,6 +29,14 @@ llm_dict["gpt-4o"] = ChatOpenAI(
                         max_retries=2,
                     )
 
+llm_dict["gpt-4o-baseline"] = ChatOpenAI(
+                        model="gpt-4o",
+                        temperature=0,
+                        max_tokens=None,
+                        timeout=None,
+                        max_retries=2,
+                    )
+
 llm_dict["gpt-4.5-preview"] = ChatOpenAI(
                         model="gpt-4.5-preview",
                         temperature=0,

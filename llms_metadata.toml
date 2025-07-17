@@ -23,6 +23,15 @@ hosting_platform = 'openai'
 opensource = false
 preview = false
 
+[models.openai.gpt-4o-baseline]
+input_price = 2.5
+cached_input_price = 1.25
+output_price = 10.0
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
 [models.openai.gpt-4o-mini]
 input_price = 0.15
 cached_input_price = 0.075

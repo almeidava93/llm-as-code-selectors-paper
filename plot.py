@@ -8,6 +8,8 @@ import seaborn as sns
 
 BASELINE_F1SCORE = 0.8043775649794802
 
+BASELINE_GPT4O = 0.4269
+
 # Models to evaluate
 models = [
     'gpt-4o-mini',
@@ -108,6 +110,9 @@ def summarize_models(cm: pd.DataFrame, lr: pd.DataFrame):
     summary = cm.loc[idx, ['model', 'top_k', 'f1_score']].rename(
         columns={'top_k': 'top_k_max', 'f1_score': 'f1_score_max'}
     ).reset_index(drop=True)
+
+    # filter models of interest
+    summary = summary[summary['model'].isin(models)]
     
     # 3) Compute average token usage for each model at its optimal top_k
     avg_tokens = []
@@ -172,7 +177,8 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     ax.set_ylim(0, 1)  # Force y-axis to span from 0 to 1
     # ax.set_title('Uso médio de tokens vs. F1-score máximo')
     ax.grid(True, linestyle='--', alpha=0.5)
-    ax.axhline(BASELINE_F1SCORE, color='gray', linestyle='--', alpha=0.5,label="baseline")
+    ax.axhline(BASELINE_F1SCORE, color='orange', linestyle='--', alpha=0.5,label="baseline")
+    ax.axhline(BASELINE_GPT4O, color='gray', linestyle='--', alpha=0.5,label="gpt-4o without search results")
     ax.legend(loc='lower right')
     plt.tight_layout()
     fig.savefig(plots_path /'token_usage_vs_f1.png')
@@ -213,6 +219,9 @@ def summarize_models(cm: pd.DataFrame, lr: pd.DataFrame):
     summary = cm.loc[idx, ['model', 'top_k', 'f1_score']].rename(
         columns={'top_k': 'top_k_max', 'f1_score': 'f1_score_max'}
     ).reset_index(drop=True)
+
+    # filter models of interest
+    summary = summary[summary['model'].isin(models)]
     
     # 3) Compute average input token usage for each model at its optimal top_k
     avg_input_tokens = []
@@ -310,7 +319,7 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     ax.set_ylim(0.65, 0.9)  # Force y-axis to span from 0 to 1
     # ax.set_title('Preço médio de 1000 respostas vs. F1-score máximo')
     ax.grid(True, linestyle='--', alpha=0.5)
-    ax.axhline(BASELINE_F1SCORE, color='gray', linestyle='--', alpha=0.5,label="baseline")
+    ax.axhline(BASELINE_F1SCORE, color='orange', linestyle='--', alpha=0.5,label="baseline")
     ax.legend(loc='lower right')
     plt.tight_layout()
     fig.savefig(plots_path / 'price_per_response_vs_f1.png')
@@ -416,7 +425,8 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     ax.set_ylim(0.0, 1.0)  # Force y-axis to span from 0 to 1
     # ax.set_title('Preço médio de 1000 respostas vs. F1-score máximo')
     ax.grid(True, linestyle='--', alpha=0.5)
-    ax.axhline(BASELINE_F1SCORE, color='gray', linestyle='--', alpha=0.5,label="baseline")
+    ax.axhline(BASELINE_F1SCORE, color='orange', linestyle='--', alpha=0.5,label="baseline")
+    ax.axhline(BASELINE_GPT4O, color='gray', linestyle='--', alpha=0.5,label="gpt-4o without search results")
     ax.legend(loc='lower right')
     plt.tight_layout()
     fig.savefig(plots_path /    'n_params_vs_f1.png')
@@ -525,7 +535,8 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     ax.set_ylim(0.0, 1.0)  # Force y-axis to span from 0 to 1
     # ax.set_title('Tempo médio por resposta vs. F1-score máximo')
     ax.grid(True, linestyle='--', alpha=0.5)
-    ax.axhline(BASELINE_F1SCORE, color='gray', linestyle='--', alpha=0.5,label="baseline")
+    ax.axhline(BASELINE_F1SCORE, color='orange', linestyle='--', alpha=0.5,label="baseline")
+    ax.axhline(BASELINE_GPT4O, color='gray', linestyle='--', alpha=0.5,label="gpt-4o without search results")
     ax.legend(loc='lower right')
     plt.tight_layout()
     fig.savefig(plots_path / 'timedelta_per_response_vs_f1.png')

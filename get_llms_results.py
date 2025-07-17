@@ -36,16 +36,6 @@ best_result_prompt_template_for_gemma_2_models = ChatPromptTemplate([
     ("user", "You are a helpful medical coder and expert in the International Classification of Primary Care. You will receive a query and a list of results from an ICPC search engine. Your  task is to select the result that best matches the query. Your response should be a single ICPC code between the XML tags <answer>selected_code</answer>. If there is no result good enough to match the given query, return an empty answer: <answer></answer>.\n\nQuery: {query}\n\nSearch engine results: {search_engine_results}"),
 ])
 
-llama_grpo_prompt_template = ChatPromptTemplate([
-    ("system", "You are a helpful medical coder and expert in the International Classification of Primary Care. You will receive a query and a list of results from an ICPC search engine. Your task is to select the result that best matches the query. You should first think about the reasoning process and then answer. Your response should include your reasoning within a <think></think> tag followed by the correct ICPC code within <answer></answer> tag. If there is no result good enough to match the given query, return your reasoning with an empty answer tag."),
-    ("user", "Query: {query}\n\nSearch engine results: {search_engine_results}"),
-])
-
-llama_grpo_prompt_exp_005_template = ChatPromptTemplate([
-    ("system", "This is a conversation between a user and an assistant. The assistant is a helpful medical coder and expert in the International Classification of Primary Care (ICPC). The user gives a query and a list of results from an ICPC search engine. The assistant thinks about the list of results and then selects the ICPC code that best matches the query. The assistant always responds in the following format: <think>assistant's reasoning</think><answer>selected ICPC code</answer>. The assistant can leave the <answer></answer> tag empty if there is no result good enough to match the given query."),
-    ("user", "Query: {query}\n\nSearch engine results: {search_engine_results}"),
-])
-
 
 def get_llms_results(
         models_list: list[str],
@@ -96,12 +86,6 @@ def get_llms_results(
 
                 elif llm_model_name in ['gemma-2-27b-it', 'gemma-3-4b-it']:
                     prompt_template = best_result_prompt_template_for_gemma_2_models
-
-                elif 'llama-3.2-1B-instruct-grpo-005' in llm_model_name:
-                    prompt_template = llama_grpo_prompt_exp_005_template
-                
-                elif 'llama-3.2-1B-instruct-grpo' in llm_model_name:
-                    prompt_template = llama_grpo_prompt_template
 
                 else:
                     prompt_template = best_result_prompt_template

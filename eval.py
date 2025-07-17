@@ -39,6 +39,7 @@ top_ks = [10, 20, 50, 100, 200]
 
 # Models to evaluate
 models = [
+    'gpt-4o-baseline',
     'gpt-4o-mini',
     'gpt-4o',
     'gpt-4.5-preview',
