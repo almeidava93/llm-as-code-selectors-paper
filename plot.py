@@ -3,8 +3,10 @@ import toml
 import pandas as pd
 import matplotlib.pyplot as plt
 from adjustText import adjust_text
+import numpy as np
+import seaborn as sns
 
-BASELINE_F1SCORE = 0.7994505494505495
+BASELINE_F1SCORE = 0.8043775649794802
 
 # Models to evaluate
 models = [
@@ -574,3 +576,123 @@ for metric, title in metrics:
     ax.set_xticklabels(means.index, rotation=45, ha='right')
     plt.tight_layout()
     fig.savefig(plots_path / f'{metric}_per_model.png')
+
+
+
+
+# PLOT HEATMAPS OF THE EVALUATION DATASET ######################
+
+# Load datasets
+eval_df = pd.read_csv("data/eval_dataset.csv")
+valid_codes_df = pd.read_csv("data/icpc-2_partial.csv")
+
+# Extract valid ICPC-2 codes
+valid_codes = set(valid_codes_df['code'].dropna().astype(str).str.strip())
+valid_regular_codes = [code for code in valid_codes if not code.startswith("-")]
+valid_procedure_codes = [code for code in valid_codes if code.startswith("-") and code[1:].isdigit()]
+
+# Count code frequencies from 'relevant_results'
+def extract_codes(value):
+    if pd.isna(value):
+        return []
+    return [code.strip() for code in value.split('|') if code.strip()]
+
+eval_df["parsed_codes"] = eval_df["relevant_results"].apply(extract_codes)
+all_codes = [code for codes in eval_df["parsed_codes"] for code in codes]
+procedure_codes = [code for code in all_codes if code.startswith("-")]
+regular_codes = [code for code in all_codes if not code.startswith("-")]
+regular_freq = pd.Series(regular_codes).value_counts()
+procedure_freq = pd.Series([int(code[1:]) for code in procedure_codes]).value_counts()
+
+# ICPC-2 chapter mapping
+chapters = {
+    "A": "A - General and Unspecified", "B": "B - Blood, Blood Forming Organs and Immune Mechanism", "D": "D - Digestive", "F": "F - Eye", "H": "H - Ear",
+    "K": "K - Cardiovascular", "L": "L - Musculoskeletal", "N": "N - Neurological", "P": "P - Psychological",
+    "R": "R - Respiratory", "S": "S - Skin", "T": "T - Endocrine/Metabolic and Nutritional", "U": "U - Urological",
+    "W": "W - Pregnancy, Childbearing, Family Planning", "X": "X - Female Genital", "Y": "Y - Male Genital", 
+    "Z": "Z - Social problems"
+}
+
+# Determine valid numeric codes per chapter
+valid_chapter_codes = {k: set() for k in chapters}
+for code in valid_regular_codes:
+    if len(code) >= 3 and code[0] in chapters and code[1:].isdigit():
+        valid_chapter_codes[code[0]].add(int(code[1:]))
+
+# Create chapter-code frequency matrix
+chapter_code_matrix = {chapters[k]: [np.nan]*99 for k in chapters}
+for letter, nums in valid_chapter_codes.items():
+    chapter_name = chapters[letter]
+    # chapter_name = letter
+    for i in range(99):
+        code_num = i + 1
+        full_code = f"{letter}{code_num:02d}"
+        if code_num in nums:
+            chapter_code_matrix[chapter_name][i] = regular_freq.get(full_code, 0)
+        else:
+            chapter_code_matrix[chapter_name][i] = -1
+
+# Create DataFrame for heatmap
+heatmap_df = pd.DataFrame(chapter_code_matrix, index=range(1, 100)).transpose()
+
+# Special procedures heatmap
+proc_range = range(30, 70)
+proc_row = []
+for code_num in proc_range:
+    full_code = f"-{code_num}"
+    if full_code in valid_codes:
+        proc_row.append(procedure_freq.get(code_num, 0))
+    else:
+        proc_row.append(-1)
+special_proc_df = pd.DataFrame([proc_row], index=[""], columns=proc_range)
+
+# Plot regular ICPC-2 heatmap
+heatmap_values = heatmap_df.loc[:, [i for i in range(1, 100) if i < 30 or i > 69]]
+invalid_mask = heatmap_values == -1
+valid_mask = heatmap_values.isna() | (heatmap_values == 0)
+
+fig = plt.figure(figsize=(20, 6))
+ax = sns.heatmap(
+    heatmap_values.fillna(0).mask(invalid_mask),
+    cmap="coolwarm",
+    linewidths=0.5,
+    cbar_kws={'label': 'Frequency'},
+    square=True,
+    mask=valid_mask & ~invalid_mask,
+    linecolor="#ffffff"
+)
+for i in range(heatmap_values.shape[0]):
+    for j in range(heatmap_values.shape[1]):
+        if invalid_mask.iloc[i, j]:
+            ax.add_patch(plt.Rectangle((j, i), 1, 1, fill=True, color='#e8e6e1', lw=0))
+
+# plt.title("Mapa de frequências de códigos CIAP-2 (exceto procedimentos)", fontsize=16, pad=20)
+plt.ylabel("Chapters", fontsize=12)
+plt.xlabel("Numeric code", fontsize=12)
+plt.tight_layout()
+# save plot
+fig.savefig(plots_path / 'heatmap_1.png', dpi=300, bbox_inches='tight')
+
+# Plot special procedures heatmap
+special_invalid_mask = special_proc_df == -1
+special_valid_mask = special_proc_df.isna() | (special_proc_df == 0)
+
+fig = plt.figure(figsize=(10, 3))
+ax2 = sns.heatmap(
+    special_proc_df.fillna(0).mask(special_invalid_mask),
+    cmap="coolwarm",
+    linewidths=0.5,
+    cbar_kws={'label': 'Frequency'},
+    square=True,
+    mask=special_valid_mask & ~special_invalid_mask,
+    linecolor="#ffffff"
+)
+for j in range(special_proc_df.shape[1]):
+    if special_invalid_mask.iloc[0, j]:
+        ax2.add_patch(plt.Rectangle((j, 0), 1, 1, fill=True, color='#e8e6e1', lw=0))
+
+# plt.title("Mapa de frequências de códigos CIAP-2 (somente procedimentos)", fontsize=16, pad=20)
+plt.ylabel("Process codes", fontsize=12)
+plt.xlabel("Numeric code", fontsize=12)
+plt.tight_layout()
+fig.savefig(plots_path / 'heatmap_2.png', dpi=300, bbox_inches='tight')
