@@ -666,7 +666,6 @@ for i in range(heatmap_values.shape[0]):
         if invalid_mask.iloc[i, j]:
             ax.add_patch(plt.Rectangle((j, i), 1, 1, fill=True, color='#e8e6e1', lw=0))
 
-# plt.title("Mapa de frequências de códigos CIAP-2 (exceto procedimentos)", fontsize=16, pad=20)
 plt.ylabel("Chapters", fontsize=12)
 plt.xlabel("Numeric code", fontsize=12)
 plt.tight_layout()
@@ -691,7 +690,6 @@ for j in range(special_proc_df.shape[1]):
     if special_invalid_mask.iloc[0, j]:
         ax2.add_patch(plt.Rectangle((j, 0), 1, 1, fill=True, color='#e8e6e1', lw=0))
 
-# plt.title("Mapa de frequências de códigos CIAP-2 (somente procedimentos)", fontsize=16, pad=20)
 plt.ylabel("Process codes", fontsize=12)
 plt.xlabel("Numeric code", fontsize=12)
 plt.tight_layout()
