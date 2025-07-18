@@ -71,7 +71,11 @@ class Openai_embeddings(EmbeddingModelBaseClass):
         openai.api_key = api_key
         self.openai_client = OpenAI()
 
-    def get_embeddings(self, documents : list[str]) -> list[list[float]]:
+    def get_embeddings(self, documents : list[str], return_token_usage : bool = False) -> list[list[float]]:
+        if return_token_usage:
+            response = self.openai_client.embeddings.create(input = documents, model=self.model)
+            return [emb.embedding for emb in response.data], response.usage.total_tokens
+
         embeddings = self.openai_client.embeddings.create(input = documents, model=self.model).data
         return [emb.embedding for emb in embeddings]    
     
@@ -103,7 +107,7 @@ class Openai_embeddings(EmbeddingModelBaseClass):
         documents_in_vectorstore = collection.get()['documents']
 
         # check if the documents are exactly what we need
-        if sorted(documents_in_vectorstore) != sorted(THESAURUS_EXPRESSIONS_LIST):
+        if sorted(set(documents_in_vectorstore)) != sorted(set(THESAURUS_EXPRESSIONS_LIST)):
             logger.info(f"The data in the collection is not complete or incorrect. Applying corrections to {self.db_collection_name}")
             
             logger.info("Removing documents that should not be in the collection.")
@@ -122,9 +126,9 @@ class Openai_embeddings(EmbeddingModelBaseClass):
     def retrieve(self, 
                  input: Union[str, list[str]], 
                  top_k: int = 10, 
-                 save_to_disk : bool = False, 
-                 include_metadatas : bool = False,
-                 results_file_path : Path = queries_results_path) -> list[list[str]]:
+                 batch_size : int = 1000,
+                 return_token_usage : bool = False,
+                 ) -> list[list[str]]:
         """
         This function handles the information retrieval process and returns a list \
         of ICPC codes based on the queries given.
@@ -135,7 +139,7 @@ class Openai_embeddings(EmbeddingModelBaseClass):
         input : query for the retrieval
         top_k : number of top results to return
         data : this is the data used to build the BM25 index and will be used to retrieve the results
-        save_to_disk: if True, saves results to disk in the csv file in results_file_path
+        batch_size : size of batches to generate embeddings
         """
 
         if isinstance(input, str):
@@ -143,48 +147,40 @@ class Openai_embeddings(EmbeddingModelBaseClass):
 
         assert isinstance(input, list) and all(isinstance(item, str) for item in input), \
             "Input must be either of type str or list[str]"
-        
-        all_results = []
-        all_results_retrieval_time = []
 
         # Get collection
         collection = self.db_client.get_collection(self.db_collection_name)
 
         logger.info(f"Retrieving with Collection {self.db_collection_name}...")
-        for query in tqdm(input):
-            t0 = dt.now()
         
-            # Generate query embedding
-            query_embedding = self.get_embeddings(query)
-
-            # Query collection
-            results = collection.query(query_embeddings=query_embedding, 
-                                       include=["documents", "metadatas"], 
-                                       n_results=top_k)
-            metadatas = results["metadatas"][0]
-
-            if include_metadatas:
-                all_results.append(metadatas)
+        # Get embeddings in batches
+        inputs_embeddings = []
+        total_token_usage = 0
+        for i in tqdm(range(0, len(input), batch_size), desc=f"Generating query embeddings in batches of {batch_size}"):
+            if return_token_usage:
+                embeddings, token_usage = self.get_embeddings(input[i:i+batch_size], return_token_usage=return_token_usage)
+                inputs_embeddings += embeddings
+                total_token_usage += token_usage
             else:
-                icpc_codes_list = [doc["code"] for doc in metadatas]            
-                all_results.append(icpc_codes_list)
+                inputs_embeddings +=self.get_embeddings(input[i:i+batch_size])
 
-            
-            # Collect results and elapsed time
-            t1 = dt.now()
-            t_delta = t1 - t0
-            all_results_retrieval_time.append(t_delta)
+        # Query collection
+        results = collection.query(query_embeddings=inputs_embeddings, 
+                            include=["documents", "metadatas", "distances"], 
+                            n_results=top_k)
         
-        if save_to_disk:
-            logger.info(f"Saving results to disk at {results_file_path}")
-            queries_results_df = pd.read_csv(results_file_path, index_col=0).dropna()
-            queries_results_df[f"{self.db_collection_name}"] = ['|'.join(result) for result in all_results]
-            queries_results_df[f"{self.db_collection_name}_time"] = all_results_retrieval_time
-            queries_results_df.to_csv(results_file_path)
+        # Gather results and their metadata
+        gathered_results = []
+        for metadatas, distances in zip(results["metadatas"], results["distances"]):
+            metadatas = [{**metadata, 'distance': -(distance-1)} for metadata, distance in zip(metadatas, distances)]
+            gathered_results.append(metadatas)
         
         logger.info("Done!")
 
-        return all_results
+        if return_token_usage:
+            return gathered_results, total_token_usage
+
+        return gathered_results
         
 
 class Openai_embeddings_v3(Openai_embeddings):

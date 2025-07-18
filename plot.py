@@ -6,8 +6,7 @@ from adjustText import adjust_text
 import numpy as np
 import seaborn as sns
 
-BASELINE_F1SCORE = 0.8043775649794802
-
+BASELINE_FIRST_RESULT_SELECTION = 0.8043775649794802
 BASELINE_GPT4O = 0.4269
 
 # Models to evaluate
@@ -177,7 +176,7 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     ax.set_ylim(0, 1)  # Force y-axis to span from 0 to 1
     # ax.set_title('Uso médio de tokens vs. F1-score máximo')
     ax.grid(True, linestyle='--', alpha=0.5)
-    ax.axhline(BASELINE_F1SCORE, color='orange', linestyle='--', alpha=0.5,label="baseline")
+    ax.axhline(BASELINE_FIRST_RESULT_SELECTION, color='orange', linestyle='--', alpha=0.5,label="first result selection")
     ax.axhline(BASELINE_GPT4O, color='gray', linestyle='--', alpha=0.5,label="gpt-4o without search results")
     ax.legend(loc='lower right')
     plt.tight_layout()
@@ -319,7 +318,7 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     ax.set_ylim(0.65, 0.9)  # Force y-axis to span from 0 to 1
     # ax.set_title('Preço médio de 1000 respostas vs. F1-score máximo')
     ax.grid(True, linestyle='--', alpha=0.5)
-    ax.axhline(BASELINE_F1SCORE, color='orange', linestyle='--', alpha=0.5,label="baseline")
+    ax.axhline(BASELINE_FIRST_RESULT_SELECTION, color='orange', linestyle='--', alpha=0.5,label="first result selection")
     ax.legend(loc='lower right')
     plt.tight_layout()
     fig.savefig(plots_path / 'price_per_response_vs_f1.png')
@@ -425,7 +424,7 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     ax.set_ylim(0.0, 1.0)  # Force y-axis to span from 0 to 1
     # ax.set_title('Preço médio de 1000 respostas vs. F1-score máximo')
     ax.grid(True, linestyle='--', alpha=0.5)
-    ax.axhline(BASELINE_F1SCORE, color='orange', linestyle='--', alpha=0.5,label="baseline")
+    ax.axhline(BASELINE_FIRST_RESULT_SELECTION, color='orange', linestyle='--', alpha=0.5,label="first result selection")
     ax.axhline(BASELINE_GPT4O, color='gray', linestyle='--', alpha=0.5,label="gpt-4o without search results")
     ax.legend(loc='lower right')
     plt.tight_layout()
@@ -535,7 +534,7 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     ax.set_ylim(0.0, 1.0)  # Force y-axis to span from 0 to 1
     # ax.set_title('Tempo médio por resposta vs. F1-score máximo')
     ax.grid(True, linestyle='--', alpha=0.5)
-    ax.axhline(BASELINE_F1SCORE, color='orange', linestyle='--', alpha=0.5,label="baseline")
+    ax.axhline(BASELINE_FIRST_RESULT_SELECTION, color='orange', linestyle='--', alpha=0.5,label="first result selection")
     ax.axhline(BASELINE_GPT4O, color='gray', linestyle='--', alpha=0.5,label="gpt-4o without search results")
     ax.legend(loc='lower right')
     plt.tight_layout()

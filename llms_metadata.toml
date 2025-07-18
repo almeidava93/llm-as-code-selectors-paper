@@ -14,6 +14,15 @@
 [models.openai]
 provider_name = 'OpenAI'
 
+[models.openai.text-embedding-3-large]
+input_price = 0.13
+cached_input_price = false
+output_price = false
+num_params = false
+hosting_platform = 'openai'
+opensource = false
+preview = false
+
 [models.openai.gpt-4o]
 input_price = 2.5
 cached_input_price = 1.25
