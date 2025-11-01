@@ -5,6 +5,8 @@ import matplotlib.pyplot as plt
 from adjustText import adjust_text
 import numpy as np
 import seaborn as sns
+from matplotlib.lines import Line2D
+import matplotlib.patches as mpatches
 
 BASELINE_FIRST_RESULT_SELECTION = 0.8043775649794802
 BASELINE_GPT4O = 0.4269
@@ -91,6 +93,44 @@ cm, lr = load_data(metrics_csv, results_csv)
 
 # PLOT F1-SCORE VS AVERAGE TOKEN USAGE PER RESPONSE #################################
 
+def map_model_to_color_and_provider(summary: pd.DataFrame):
+    colors = []
+    model_providers = []
+    for row in summary.to_dict('records'):
+        if row['model'].startswith('DeepSeek'):
+            colors.append('#160F29')
+            model_providers.append('DeepSeek')
+
+        elif row['model'].startswith('Llama'):
+            colors.append('#379392')
+            model_providers.append('Llama')
+
+        elif row['model'].startswith('Qw'):
+            colors.append('#E6C79C')
+            model_providers.append('Qwen')
+
+        elif row['model'].startswith('gemini'):
+            colors.append('#CDDFA0')
+            model_providers.append('Gemini')
+
+        elif row['model'].startswith('gemma'):
+            colors.append('#744FC6')
+            model_providers.append('Gemma')
+        
+        elif row['model'].startswith('sabia'):
+            colors.append('#EF476F')
+            model_providers.append('Maritaca AI')
+        
+        elif row['model'].startswith('gpt') or row['model'].startswith('o'):
+            colors.append('#A197B3')
+            model_providers.append('OpenAI')
+
+    summary['color'] = colors
+    summary['model_provider'] = model_providers
+
+    return summary
+
+
 def summarize_models(cm: pd.DataFrame, lr: pd.DataFrame):
     """
     For each model, find the top_k with the maximum F1 score, then compute
@@ -132,6 +172,9 @@ def summarize_models(cm: pd.DataFrame, lr: pd.DataFrame):
     # 5) Filter models of interest
     summary = summary[summary['model'].isin(models)]
     
+    # 6) Map model to color and provider
+    summary = map_model_to_color_and_provider(summary)
+    
     return summary
 
 def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
@@ -148,7 +191,7 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     y = summary['f1_score_max']
     
     # Scatter points
-    ax.scatter(x, y, marker='.')
+    ax.scatter(x, y, s=200, marker='.', c=summary['color'],)
     
     # Prepare annotations
     texts = []
@@ -157,7 +200,7 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
             ax.annotate(
                 text=row['model'], 
                 xy=(row['avg_total_tokens'], row['f1_score_max']),              
-                fontsize=8
+                fontsize=10
             )
         )
     
@@ -166,19 +209,33 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
         texts,
         x=x,
         y=y,
-        arrowprops=dict(arrowstyle='->', color='gray', lw=0.5),
-        force_text=(1,6),
-        max_move=200,
+        prevent_crossings=True,
+        arrowprops=dict(arrowstyle="wedge,tail_width=1.,shrink_factor=0.9",
+                            fc='#CFCFCF', ec="none"),
+        force_text=(1, 6),
+        max_move=300,
+        expand_axes=True,
     )
     
     ax.set_xlabel('Mean token usage')
     ax.set_ylabel('Max F1-score')
     ax.set_ylim(0, 1)  # Force y-axis to span from 0 to 1
     # ax.set_title('Uso médio de tokens vs. F1-score máximo')
-    ax.grid(True, linestyle='--', alpha=0.5)
+    ax.grid(True, linestyle='--', alpha=0.2)
     ax.axhline(BASELINE_FIRST_RESULT_SELECTION, color='orange', linestyle='--', alpha=0.5,label="first result selection")
     ax.axhline(BASELINE_GPT4O, color='gray', linestyle='--', alpha=0.5,label="gpt-4o without search results")
-    ax.legend(loc='lower right')
+
+    # Build a legend that shows provider color swatches and baseline lines
+    providers = summary['model_provider'].unique() if 'model_provider' in summary.columns else []
+    handles = []
+    for p in providers:
+        # pick the first color found for this provider
+        color = summary[summary['model_provider'] == p]['color'].iloc[0]
+        handles.append(mpatches.Patch(color=color, label=p))
+    # Add baselines as line entries
+    handles.append(Line2D([0], [0], color='orange', linestyle='--', alpha=0.5, label='first result selection'))
+    handles.append(Line2D([0], [0], color='gray', linestyle='--', alpha=0.5, label='gpt-4o without search results'))
+    ax.legend(handles=handles, loc='lower right')
     plt.tight_layout()
     fig.savefig(plots_path /'token_usage_vs_f1.png')
 
@@ -269,6 +326,10 @@ def summarize_models(cm: pd.DataFrame, lr: pd.DataFrame):
     
     # 4) Drop any models lacking token usage data
     summary = summary.dropna(subset=['avg_price_per_response']).reset_index(drop=True)
+    
+    # 6) Map model to color and provider
+    summary = map_model_to_color_and_provider(summary)
+    
     return summary
 
 def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
@@ -285,7 +346,7 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     y = summary['f1_score_max']
     
     # Scatter points
-    ax.scatter(x, y, marker='x')
+    ax.scatter(x, y, s=200, marker='.', c=summary['color'],)
     ax.set_xscale('log')
     
     # Prepare annotations
@@ -293,9 +354,9 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     for _, row in summary.iterrows():
         texts.append(
             ax.annotate(
-                text=row['model'],
-                xy=(row['avg_price_per_response'], row['f1_score_max']),
-                fontsize=8
+                text=row['model'], 
+                xy=(row['avg_price_per_response'], row['f1_score_max']),              
+                fontsize=10
             )
         )
     
@@ -304,28 +365,41 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
         texts,
         x=x,
         y=y,
-        arrowprops=dict(arrowstyle='->', color='gray', lw=0.5),
-        expand_text=(1.5, 2.0),
-        expand_points=(1.5, 2.0),
-        force_text=(1.0,1.0),
-        force_points=(0.3, 0.3),
-        max_iter=200,
-        expand=(1.5,1.5)
+        prevent_crossings=True,
+        arrowprops=dict(arrowstyle="wedge,tail_width=1.,shrink_factor=0.9",
+                            fc='#CFCFCF', ec="none"),
+        force_text=(1, 6),
+        max_move=300,
+        expand_axes=True,
     )
     
     ax.set_xlabel('Mean price (USD) per 1000 responses')
     ax.set_ylabel('Max F1-score')
-    ax.set_ylim(0.65, 0.9)  # Force y-axis to span from 0 to 1
-    # ax.set_title('Preço médio de 1000 respostas vs. F1-score máximo')
-    ax.grid(True, linestyle='--', alpha=0.5)
+    ax.set_ylim(0.65, 0.9) 
+    ax.grid(True, linestyle='--', alpha=0.2)
     ax.axhline(BASELINE_FIRST_RESULT_SELECTION, color='orange', linestyle='--', alpha=0.5,label="first result selection")
-    ax.legend(loc='lower right')
+    ax.axhline(BASELINE_GPT4O, color='gray', linestyle='--', alpha=0.5,label="gpt-4o without search results")
+
+    # Build a legend that shows provider color swatches and baseline lines
+    providers = summary['model_provider'].unique() if 'model_provider' in summary.columns else []
+    handles = []
+    for p in providers:
+        # pick the first color found for this provider
+        color = summary[summary['model_provider'] == p]['color'].iloc[0]
+        handles.append(mpatches.Patch(color=color, label=p))
+    # Add baselines as line entries
+    handles.append(Line2D([0], [0], color='orange', linestyle='--', alpha=0.5, label='first result selection'))
+    handles.append(Line2D([0], [0], color='gray', linestyle='--', alpha=0.5, label='gpt-4o without search results'))
+    ax.legend(handles=handles, loc='lower right')
     plt.tight_layout()
-    fig.savefig(plots_path / 'price_per_response_vs_f1.png')
+    fig.savefig(plots_path /'price_per_response_vs_f1.png')
 
 # Paths to your CSV files
 metrics_csv = 'metrics/computed_metrics.csv'
 results_csv = 'data/llms_results.csv'
+
+# Load data
+cm, lr = load_data(metrics_csv, results_csv)
 
 # Summarize per-model performance
 summary = summarize_models(cm, lr)
@@ -373,6 +447,10 @@ def summarize_models(cm: pd.DataFrame, lr: pd.DataFrame):
     
     # 4) Drop any models lacking token usage data
     summary = summary.dropna(subset=['n_params']).reset_index(drop=True)
+    
+    # 6) Map model to color and provider
+    summary = map_model_to_color_and_provider(summary)
+    
     return summary
 
 def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
@@ -389,7 +467,7 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
     y = summary['f1_score_max']
     
     # Scatter points
-    ax.scatter(x, y, marker='o')
+    ax.scatter(x, y, s=200, marker='.', c=summary['color'],)
     ax.set_xscale('log')
     
     # Prepare annotations
@@ -400,7 +478,7 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
                 row['n_params'], 
                 row['f1_score_max'], 
                 row['model'], 
-                fontsize=9
+                fontsize=10
             )
         )
     
@@ -409,26 +487,41 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
         texts,
         x=x,
         y=y,
-        arrowprops=dict(arrowstyle='->', color='gray', lw=0.5),
-        # expand_text=(3,3),
-        # expand_points=(2.0, 2.0),
-        force_text=(1,6),
-        # force_points=(0.3, 0.3),
-        # max_iter=200,
-        # expand=(2,2),
-        max_move=200,
+        prevent_crossings=True,
+        arrowprops=dict(arrowstyle="wedge,tail_width=1.,shrink_factor=0.9",
+                            fc='#CFCFCF', ec="none"),
+        force_text=(1, 6),
+        max_move=300,
+        expand_axes=True,
     )
     
     ax.set_xlabel('Number of parameters (billions)')
     ax.set_ylabel('Max F1-score')
-    ax.set_ylim(0.0, 1.0)  # Force y-axis to span from 0 to 1
-    # ax.set_title('Preço médio de 1000 respostas vs. F1-score máximo')
-    ax.grid(True, linestyle='--', alpha=0.5)
+    ax.set_ylim(0.0, 1.0)  
+    ax.grid(True, linestyle='--', alpha=0.2)
     ax.axhline(BASELINE_FIRST_RESULT_SELECTION, color='orange', linestyle='--', alpha=0.5,label="first result selection")
     ax.axhline(BASELINE_GPT4O, color='gray', linestyle='--', alpha=0.5,label="gpt-4o without search results")
-    ax.legend(loc='lower right')
+
+    # Build a legend that shows provider color swatches and baseline lines
+    providers = summary['model_provider'].unique() if 'model_provider' in summary.columns else []
+    handles = []
+    for p in providers:
+        # pick the first color found for this provider
+        color = summary[summary['model_provider'] == p]['color'].iloc[0]
+        handles.append(mpatches.Patch(color=color, label=p))
+    # Add baselines as line entries
+    handles.append(Line2D([0], [0], color='orange', linestyle='--', alpha=0.5, label='first result selection'))
+    handles.append(Line2D([0], [0], color='gray', linestyle='--', alpha=0.5, label='gpt-4o without search results'))
+    ax.legend(handles=handles, loc='lower right')
     plt.tight_layout()
-    fig.savefig(plots_path /    'n_params_vs_f1.png')
+    fig.savefig(plots_path /'n_params_vs_f1.png')
+
+# Paths to your CSV files
+metrics_csv = 'metrics/computed_metrics.csv'
+results_csv = 'data/llms_results.csv'
+
+# Load data
+cm, lr = load_data(metrics_csv, results_csv)
 
 # Summarize per-model performance
 summary = summarize_models(cm, lr)
@@ -441,17 +534,6 @@ plot_summary(summary)
 # PLOT F1-SCORE VS AVERAGE TIME PER RESPONSE #########################################################
 
 def summarize_models(cm: pd.DataFrame, lr: pd.DataFrame):
-    """
-    For each model, find the top_k with the maximum F1 score, then compute
-    the average price per response considering the model price and token usage.
-    
-    Args:
-        cm: DataFrame containing columns ['model', 'top_k', 'f1_score']
-        lr: DataFrame containing columns like '{model}-top-{top_k}-total_tokens'
-        
-    Returns:
-        summary: DataFrame with columns ['model', 'top_k_max', 'f1_score_max', 'avg_total_tokens']
-    """
     # 1) Find the row index of max F1 score per model
     idx = cm.groupby('model')['f1_score'].idxmax()
     
@@ -483,6 +565,10 @@ def summarize_models(cm: pd.DataFrame, lr: pd.DataFrame):
     summary = summary.dropna(subset=['avg_time_per_response']).reset_index(drop=True)
 
     summary = summary[summary['model'].isin(models)]
+    
+    # 6) Map model to color and provider
+    summary = map_model_to_color_and_provider(summary)
+    
     return summary
 
 def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
@@ -494,12 +580,12 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
         summary: DataFrame from summarize_models()
         figsize: Tuple specifying figure size
     """
-    fig, ax = plt.subplots(figsize=figsize, dpi=100)
+    fig, ax = plt.subplots(figsize=figsize, dpi=300)
     x = summary['avg_time_per_response']
     y = summary['f1_score_max']
     
     # Scatter points
-    ax.scatter(x, y, marker='.')
+    ax.scatter(x, y, s=200, marker='.', c=summary['color'],)
     ax.set_xscale('log')
     
     # Prepare annotations
@@ -510,7 +596,7 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
                 row['avg_time_per_response'], 
                 row['f1_score_max'], 
                 row['model'], 
-                fontsize=8
+                fontsize=10
             )
         )
     
@@ -519,26 +605,41 @@ def plot_summary(summary: pd.DataFrame, figsize=(12, 8)):
         texts,
         x=x,
         y=y,
-        arrowprops=dict(arrowstyle='->', color='gray', lw=0.5),
-        # expand_text=(3,3),
-        # expand_points=(2.0, 2.0),
-        force_text=(1,6),
-        # force_points=(0.3, 0.3),
-        # max_iter=200,
-        # expand=(2,2),
-        max_move=200,
+        prevent_crossings=True,
+        arrowprops=dict(arrowstyle="wedge,tail_width=1.,shrink_factor=0.9",
+                            fc='#CFCFCF', ec="none"),
+        force_text=(1, 6),
+        max_move=300,
+        expand_axes=True,
     )
     
     ax.set_xlabel('Mean time (seconds) per response')
     ax.set_ylabel('Max F1-score')
-    ax.set_ylim(0.0, 1.0)  # Force y-axis to span from 0 to 1
-    # ax.set_title('Tempo médio por resposta vs. F1-score máximo')
-    ax.grid(True, linestyle='--', alpha=0.5)
+    ax.set_ylim(0.0, 1.0)  
+    ax.grid(True, linestyle='--', alpha=0.2)
     ax.axhline(BASELINE_FIRST_RESULT_SELECTION, color='orange', linestyle='--', alpha=0.5,label="first result selection")
     ax.axhline(BASELINE_GPT4O, color='gray', linestyle='--', alpha=0.5,label="gpt-4o without search results")
-    ax.legend(loc='lower right')
+
+    # Build a legend that shows provider color swatches and baseline lines
+    providers = summary['model_provider'].unique() if 'model_provider' in summary.columns else []
+    handles = []
+    for p in providers:
+        # pick the first color found for this provider
+        color = summary[summary['model_provider'] == p]['color'].iloc[0]
+        handles.append(mpatches.Patch(color=color, label=p))
+    # Add baselines as line entries
+    handles.append(Line2D([0], [0], color='orange', linestyle='--', alpha=0.5, label='first result selection'))
+    handles.append(Line2D([0], [0], color='gray', linestyle='--', alpha=0.5, label='gpt-4o without search results'))
+    ax.legend(handles=handles, loc='lower right')
     plt.tight_layout()
-    fig.savefig(plots_path / 'timedelta_per_response_vs_f1.png')
+    fig.savefig(plots_path /'timedelta_per_response_vs_f1.png')
+
+# Paths to your CSV files
+metrics_csv = 'metrics/computed_metrics.csv'
+results_csv = 'data/llms_results.csv'
+
+# Load data
+cm, lr = load_data(metrics_csv, results_csv)
 
 # Summarize per-model performance
 summary = summarize_models(cm, lr)
